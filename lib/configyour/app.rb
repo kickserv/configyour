@@ -23,6 +23,16 @@ module Configyour
       File.open(file_path, 'w') { |file| file.write(config_hash.to_yaml) }
     end
 
+    def load(environment: Configyour.configuration.environment)
+      return unless @name
+
+      parameter_set = fetch_parameter_set(environment)
+
+      parameter_set.each do |param|
+        ENV[param.name.split('/').last.upcase] = param.value
+      end
+    end
+
     private
 
     def client
