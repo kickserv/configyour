@@ -43,6 +43,49 @@ The parameter names fetched from Parameter Store are upcased to produce `ENVIRON
     * `file` - Writes to the file path defined by the `file_path` option
     * `direct` - Writes environment variables into ENV directly, bypassing the intermediary file.
 
+
+### Required Policy For IAM    
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameterHistory",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+            ],
+            "Resource": [
+                "arn:aws:ssm:<region>:<account_id>:parameter/<parameter_root>/*"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "arn:aws:kms:<region>:<account_id>:<key id>"
+            ]
+        }
+    ]
+}
+```
+
+This should be added as a IAM role that can be assigned to an ECS task (or whatever will be reading Parameter Store data)
+
 ## Development
 
 TODO
