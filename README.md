@@ -1,9 +1,5 @@
 # Configyour
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/configyour`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -22,14 +18,35 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+In `config/application.rb`, add a `Configyour.configure` block right below the `Bundler.require(*Rails.groups)` line
+
+The minimum required configuration is:
+
+```ruby
+Configyour.configure do |config|
+  config.parameter_root = '<name of the root of your parameter tree>' # example, kickserv
+end
+```
+
+If you set `parameter_root` to `your_app`, Configyour will grab all parameters under the `/your_app/<environment>/` tree.
+
+The parameter names fetched from Parameter Store are upcased to produce `ENVIRONMENT_VARIABLE` style names. This is so they fit `ENV` naturally.
+
+### Available options
+
+* `parameter_root` - Root of the parameter tree to fetch. It can contain a deeper level if required (e.g. `your_app/next_level`). It should not begin or end with a /
+* `environment` - The application's run environment (development, production, etc). It is appended to the end of the `parameter_root` option. When loaded in Rails, Configyour will use `Rails.env`.
+* `file_path` - (**File mode only**) The file to write the fetched environment variable data. You can set this to another file path if you use something other than Figaro to load your generated environment variable file. Defaults to `config/application.yml`.
+* `rebuild` - (**File mode only**) Configyour skips building the `config/application.yml` file if it already exists. This option allows you to rebuild this file on boot if you need to. Defaults to `false`
+* `region` - The AWS region where your parameters are. Defaults to `us-east-1`
+* `mode` - The mode that tells Configyour how to present the environment variable data. Defaults to `file`.
+    * `file` - Writes to the file path defined by the `file_path` option
+    * `direct` - Writes environment variables into ENV directly, bypassing the intermediary file.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+TODO
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/configyour.
+Bug reports and pull requests are welcome on GitHub at https://github.com/kickserv/configyour.

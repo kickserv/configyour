@@ -14,7 +14,7 @@ module Configyour
   end
 
   class Configuration
-    attr_accessor :application_name
+    attr_accessor :parameter_root
     attr_accessor :environment
     attr_accessor :file_path
     attr_accessor :rebuild

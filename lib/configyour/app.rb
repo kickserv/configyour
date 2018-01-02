@@ -3,13 +3,13 @@ require 'aws-sdk-ssm'
 module Configyour
   class App
 
-    def initialize(name: Configyour.configuration.application_name, region: Configyour.configuration.region)
-      @name = name
+    def initialize(parameter_root: Configyour.configuration.parameter_root, region: Configyour.configuration.region)
+      @parameter_root = parameter_root
       @region = region
     end
 
     def generate(file_path: Configyour.configuration.file_path, environment: Configyour.configuration.environment, rebuild: Configyour.configuration.rebuild)
-      return unless @name
+      return unless @parameter_root
       return if File.exist?(file_path) && !rebuild
 
       config_hash = {}
@@ -24,7 +24,7 @@ module Configyour
     end
 
     def load(environment: Configyour.configuration.environment)
-      return unless @name
+      return unless @parameter_root
 
       parameter_set = fetch_parameter_set(environment)
 
@@ -40,7 +40,7 @@ module Configyour
     end
 
     def fetch_parameter_set(environment, parameters = [], token = nil)
-      response = client.get_parameters_by_path(path: "/#{@name}/#{environment}", recursive: true, with_decryption: true, next_token: token)
+      response = client.get_parameters_by_path(path: "/#{@parameter_root}/#{environment}", recursive: true, with_decryption: true, next_token: token)
       parameters << response.parameters if response.parameters.any?
       if response.next_token
         fetch_parameter_set(environment, parameters, response.next_token)
