@@ -3,6 +3,8 @@ require 'aws-sdk-ssm'
 module Configyour
   class App
 
+    attr_accessor :parameter_root
+
     def initialize(parameter_root: Configyour.configuration.parameter_root, region: Configyour.configuration.region)
       @parameter_root = parameter_root
       @region = region
@@ -33,6 +35,28 @@ module Configyour
       end
     end
 
+    def push(file_path:, environment: Configyour.configuration.environment, overwrite: false, schema_only: false)
+      parameter_set = JSON.parse(File.read(file_path))
+
+      parameter_set['parameters'].each do |parameter|
+        params = {
+          name: build_parameter_key(environment, parameter['name']),
+          description: parameter['description'],
+          type: parameter['type'],
+          value: schema_only ? ' ' : parameter['value'],
+          overwrite: overwrite
+        }
+
+        begin
+          client.put_parameter(params)
+        rescue Aws::SSM::Errors::ParameterAlreadyExists
+          puts "#{parameter['name']} already exists in Parameter Store (specify --overwrite to force)"
+        else
+          puts "#{overwrite ? 'Updating' : 'Adding' } #{parameter['name']} to Parameter Store"
+        end
+      end
+    end
+
     private
 
     def client
@@ -40,13 +64,21 @@ module Configyour
     end
 
     def fetch_parameter_set(environment, parameters = [], token = nil)
-      response = client.get_parameters_by_path(path: "/#{@parameter_root}/#{environment}", recursive: true, with_decryption: true, next_token: token)
+      response = client.get_parameters_by_path(path: parameter_path(environment), recursive: true, with_decryption: true, next_token: token)
       parameters << response.parameters if response.parameters.any?
       if response.next_token
         fetch_parameter_set(environment, parameters, response.next_token)
       else
         parameters.flatten.sort_by(&:name)
       end
+    end
+
+    def parameter_path(environment)
+      "/#{parameter_root}/#{environment}"
+    end
+
+    def build_parameter_key(environment, name)
+      [parameter_path(environment), name].join('/')
     end
   end
 end

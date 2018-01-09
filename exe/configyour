@@ -1,3 +1,32 @@
 #!/usr/bin/env ruby
 
-require "configyour"
+require 'configyour'
+require 'thor'
+require 'json'
+
+class ConfigyourCLI < Thor
+  desc 'push <parameter root> <file path>', 'Push parameters to Parameter Store'
+  long_desc <<-LONGDESC
+    `configyour push` will push variable data defined in a JSON file.
+
+    Command parameters:
+
+    `--environment` - (required) Environment to place the parameters under (e.g. production, staging, etc.)
+
+    `--region` - (required) AWS region to push to (e.g. us-east-1)
+
+    `--overwrite` - Overwrite the parameter data in the Parameter Store
+
+    `--schema-only` - Push the parameter definition with a blank space as the value
+  LONGDESC
+  option :region, required: true
+  option :environment, required: true
+  option :overwrite, type: :boolean, default: false
+  option 'schema-only', type: :boolean
+  def push(root, path)
+    configyour = Configyour::App.new(parameter_root: root, region: options[:region])
+    configyour.push(file_path: path, environment: options[:environment], overwrite: options[:overwrite], schema_only: options['schema-only'])
+  end
+end
+
+ConfigyourCLI.start(ARGV)
