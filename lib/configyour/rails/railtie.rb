@@ -1,7 +1,7 @@
 module Configyour
   class Railtie < ::Rails::Railtie
     config.before_configuration do
-      configyour = Configyour::App.new(name: Configyour.configuration.application_name)
+      configyour = Configyour::App.new(parameter_root: Configyour.configuration.parameter_root)
 
       case Configyour.configuration.mode
       when 'file'
