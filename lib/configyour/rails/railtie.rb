@@ -1,15 +1,15 @@
 module Configyour
   class Railtie < ::Rails::Railtie
     config.before_configuration do
-      configyour = Configyour::App.new(parameter_root: Configyour.configuration.parameter_root)
+      configyour = Configyour::App.new(Configyour.configuration.parameter_root)
 
       case Configyour.configuration.mode
       when 'file'
-        configyour.generate(environment: Configyour.configuration.environment || Rails.env, file_path: Configyour.configuration.file_path)
+        configyour.generate(Configyour.configuration.file_path, Configyour.configuration.environment || Rails.env)
       when 'direct'
-        configyour.load(environment: Configyour.configuration.environment || Rails.env)
+        configyour.load(Configyour.configuration.environment || Rails.env)
       else
-        configyour.generate(environment: Configyour.configuration.environment || Rails.env, file_path: Configyour.configuration.file_path)
+        configyour.generate(Configyour.configuration.file_path, Configyour.configuration.environment || Rails.env)
       end
     end
   end

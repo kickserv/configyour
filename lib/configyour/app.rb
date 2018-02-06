@@ -5,12 +5,12 @@ module Configyour
 
     attr_accessor :parameter_root
 
-    def initialize(parameter_root: Configyour.configuration.parameter_root, region: Configyour.configuration.region)
+    def initialize(parameter_root = Configyour.configuration.parameter_root, region = Configyour.configuration.region)
       @parameter_root = parameter_root
       @region = region
     end
 
-    def generate(file_path: Configyour.configuration.file_path, environment: Configyour.configuration.environment, rebuild: Configyour.configuration.rebuild)
+    def generate(file_path = Configyour.configuration.file_path, environment = Configyour.configuration.environment, rebuild = Configyour.configuration.rebuild)
       return unless @parameter_root
       return if File.exist?(file_path) && !rebuild
 
@@ -25,7 +25,7 @@ module Configyour
       File.open(file_path, 'w') { |file| file.write(config_hash.to_yaml) }
     end
 
-    def load(environment: Configyour.configuration.environment)
+    def load(environment = Configyour.configuration.environment)
       return unless @parameter_root
 
       parameter_set = fetch_parameter_set(environment)
@@ -35,7 +35,7 @@ module Configyour
       end
     end
 
-    def push(file_path:, environment: Configyour.configuration.environment, overwrite: false, schema_only: false)
+    def push(file_path = nil, environment = Configyour.configuration.environment, overwrite = false, schema_only = false)
       parameter_set = JSON.parse(File.read(file_path))
 
       parameter_set['parameters'].each do |parameter|

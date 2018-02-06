@@ -24,8 +24,8 @@ class ConfigyourCLI < Thor
   option :overwrite, type: :boolean, default: false
   option 'schema-only', type: :boolean
   def push(root, path)
-    configyour = Configyour::App.new(parameter_root: root, region: options[:region])
-    configyour.push(file_path: path, environment: options[:environment], overwrite: options[:overwrite], schema_only: options['schema-only'])
+    configyour = Configyour::App.new(root, options[:region])
+    configyour.push(path, options[:environment], options[:overwrite], options['schema-only'])
   end
 end
 
