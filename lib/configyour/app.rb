@@ -36,6 +36,8 @@ module Configyour
     end
 
     def push(file_path = nil, environment = Configyour.configuration.environment, overwrite = false, schema_only = false)
+      return unless file_path
+      
       parameter_set = JSON.parse(File.read(file_path))
 
       parameter_set['parameters'].each do |parameter|
