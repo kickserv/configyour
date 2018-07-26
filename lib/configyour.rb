@@ -20,12 +20,14 @@ module Configyour
     attr_accessor :rebuild
     attr_accessor :region
     attr_accessor :mode
+    attr_accessor :logger
 
     def initialize
       @file_path = 'config/application.yml'
       @region = 'us-east-1'
       @rebuild = false
       @mode = 'file'
+      @logger = nil
     end
   end
 end
