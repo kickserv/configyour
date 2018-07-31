@@ -4,10 +4,12 @@ module Configyour
   class App
 
     attr_accessor :parameter_root
+    attr_accessor :logger
 
-    def initialize(parameter_root: Configyour.configuration.parameter_root, region: Configyour.configuration.region)
+    def initialize(parameter_root: Configyour.configuration.parameter_root, region: Configyour.configuration.region, logger: Configyour.configuration.logger)
       @parameter_root = parameter_root
       @region = region
+      @logger = logger
     end
 
     def generate(file_path: Configyour.configuration.file_path, environment: Configyour.configuration.environment, rebuild: Configyour.configuration.rebuild)
@@ -64,11 +66,16 @@ module Configyour
     end
 
     def fetch_parameter_set(environment, parameters = [], token = nil)
-      response = client.get_parameters_by_path(path: parameter_path(environment), recursive: true, with_decryption: true, next_token: token)
-      parameters << response.parameters if response.parameters.any?
-      if response.next_token
-        fetch_parameter_set(environment, parameters, response.next_token)
-      else
+      begin
+        response = client.get_parameters_by_path(path: parameter_path(environment), recursive: true, with_decryption: true, next_token: token)
+        parameters << response.parameters if response.parameters.any?
+        if response.next_token
+          fetch_parameter_set(environment, parameters, response.next_token)
+        else
+          parameters.flatten.sort_by(&:name)
+        end
+      rescue Aws::Errors::MissingCredentialsError
+        logger&.warn "Configyour: Unable to fetch parameters without credentials"
         parameters.flatten.sort_by(&:name)
       end
     end
