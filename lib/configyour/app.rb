@@ -66,16 +66,11 @@ module Configyour
     end
 
     def fetch_parameter_set(environment, parameters = [], token = nil)
-      begin
-        response = client.get_parameters_by_path(path: parameter_path(environment), recursive: true, with_decryption: true, next_token: token)
-        parameters << response.parameters if response.parameters.any?
-        if response.next_token
-          fetch_parameter_set(environment, parameters, response.next_token)
-        else
-          parameters.flatten.sort_by(&:name)
-        end
-      rescue Aws::Errors::MissingCredentialsError
-        logger&.warn "Configyour: Unable to fetch parameters without credentials"
+      response = client.get_parameters_by_path(path: parameter_path(environment), recursive: true, with_decryption: true, next_token: token)
+      parameters << response.parameters if response.parameters.any?
+      if response.next_token
+        fetch_parameter_set(environment, parameters, response.next_token)
+      else
         parameters.flatten.sort_by(&:name)
       end
     end
